@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "459380185961",
+    "firebase_url": "https://we-are-70.firebaseio.com",
+    "project_id": "we-are-70",
+    "storage_bucket": "we-are-70.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459380185961:android:4e6f3f74f0618a84357bf8",
+        "android_client_info": {
+          "package_name": "com.teambrj.weare70"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "459380185961-ogk819miihbcnh8knuh26vbskavd5vts.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teambrj.weare70",
+            "certificate_hash": "2a4faf6f79707909b828364d570fa2633f5b4099"
+          }
+        },
+        {
+          "client_id": "459380185961-58dc3ikcbhgb4c5gtc5fp2lhbsr0mg9t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5wg1S8cujtWaXuWNu-SCFytLM5NQYn-s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "459380185961-58dc3ikcbhgb4c5gtc5fp2lhbsr0mg9t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
