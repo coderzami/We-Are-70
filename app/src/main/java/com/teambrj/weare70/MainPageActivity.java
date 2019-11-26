@@ -36,7 +36,7 @@ public class MainPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
 
-        chatList = new ArrayList<>();
+
 
         Button mButton = findViewById(R.id.logout);
         Button mFindUser = findViewById(R.id.findUser);
@@ -101,6 +101,7 @@ public class MainPageActivity extends AppCompatActivity {
 
 
     private void initializeRecyclerView() {
+        chatList = new ArrayList<>();
         mChatList = findViewById(R.id.chatList);
         mChatList.setNestedScrollingEnabled(false);
         mChatList.setHasFixedSize(false);
