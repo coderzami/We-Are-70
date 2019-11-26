@@ -8,9 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.renderscript.Sampler;
 import android.telephony.TelephonyManager;
-import android.widget.LinearLayout;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -18,6 +16,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.teambrj.weare70.User.UserListAdapter;
+import com.teambrj.weare70.User.UserObject;
+import com.teambrj.weare70.Utils.CountryToPhonePrefix;
 
 import java.util.ArrayList;
 
@@ -58,7 +59,7 @@ public class FindUserActivity extends AppCompatActivity {
             if(!String.valueOf(phone.charAt(0)).equals("+"))
                 phone = ISOPrefix + phone;
 
-            UserObject mContact = new UserObject(name,phone);
+            UserObject mContact = new UserObject("",name,phone);
             contactList.add(mContact);
             getUserDeails(mContact);
         }
@@ -80,7 +81,7 @@ public class FindUserActivity extends AppCompatActivity {
                         if(childSnapshot.child("name").getValue() != null)
                             name = childSnapshot.child("name").getValue().toString();
 
-                        UserObject mUser = new UserObject( name, phone);
+                        UserObject mUser = new UserObject(childSnapshot.getKey(),name, phone);
                         if(name.equals(phone))
                             for(UserObject mContactIterator: contactList){
                                 if(mContactIterator.getPhone().equals(mUser.getPhone()))

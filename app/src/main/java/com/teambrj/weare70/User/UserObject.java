@@ -1,12 +1,17 @@
-package com.teambrj.weare70;
+package com.teambrj.weare70.User;
 
 public class UserObject {
 
-    private String name, phone;
+    private String uid, name, phone;
 
-    public UserObject(String name, String phone){
+    public UserObject(String uid, String name, String phone){
+        this.uid = uid;
         this.name = name;
         this.phone = phone;
+    }
+
+    public String getUid() {
+        return uid;
     }
 
     public String getName() {

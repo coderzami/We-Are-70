@@ -1,4 +1,4 @@
-package com.teambrj.weare70;
+package com.teambrj.weare70.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
