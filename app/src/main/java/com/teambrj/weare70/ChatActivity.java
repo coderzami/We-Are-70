@@ -3,6 +3,7 @@ package com.teambrj.weare70;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,9 +24,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.teambrj.weare70.Chat.ChatObject;
 import com.teambrj.weare70.Chat.MediaAdapter;
 import com.teambrj.weare70.Chat.MessageAdapter;
 import com.teambrj.weare70.Chat.MessageObject;
+import com.teambrj.weare70.User.UserObject;
+import com.teambrj.weare70.Utils.SendNotification;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,20 +43,23 @@ public class ChatActivity extends AppCompatActivity {
 
     ArrayList<MessageObject> messageList;
 
-    String chatID;
-    DatabaseReference mChatDb;
+    ChatObject mChatObject;
+    DatabaseReference mChatMessageDb;
 
     private EditText mMessage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        chatID = getIntent().getExtras().getString("chatID");
-        mChatDb =  FirebaseDatabase.getInstance().getReference().child("chat").child(chatID);
 
-        mMessage = findViewById(R.id.message);
+        mChatObject = (ChatObject) getIntent().getSerializableExtra("chatObject");
+
+        mChatMessageDb =  FirebaseDatabase.getInstance().getReference().child("chat").child(mChatObject.getChatId()).child("messages");
+
+        mMessage = findViewById(R.id.messageInput);
 
         Button mSend = findViewById(R.id.send);
         Button mAddMedia = findViewById(R.id.addMedia);
@@ -89,7 +96,7 @@ public class ChatActivity extends AppCompatActivity {
 
 
     private void getChatMessages() {
-        mChatDb.addChildEventListener(new ChildEventListener() {
+        mChatMessageDb.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 if(dataSnapshot.exists()){
@@ -144,8 +151,8 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage() {
 
 
-            String messageId = mChatDb.push().getKey();
-            final DatabaseReference newMessageDB = mChatDb.child(messageId);
+            String messageId = mChatMessageDb.push().getKey();
+            final DatabaseReference newMessageDB = mChatMessageDb.child(messageId);
 
             final Map newMessageMap = new HashMap<>();
             newMessageMap.put("creator", FirebaseAuth.getInstance().getUid());
@@ -159,7 +166,7 @@ public class ChatActivity extends AppCompatActivity {
                 for ( String mediaUri: mediaUriList){
                     String mediaId = newMessageDB.child("media").push().getKey();
                     mediaIdList.add(mediaId);
-                    final StorageReference filePath = FirebaseStorage.getInstance().getReference().child("chat").child(chatID).child(messageId).child(mediaId);
+                    final StorageReference filePath = FirebaseStorage.getInstance().getReference().child("chat").child(mChatObject.getChatId()).child(messageId).child(mediaId);
 
                     UploadTask uploadTask = filePath.putFile(Uri.parse(mediaUri));
                     uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -195,7 +202,22 @@ public class ChatActivity extends AppCompatActivity {
         mediaIdList.clear();
         mediaUriList.clear();
         mMediaAdapter.notifyDataSetChanged();
+
+        String message;
+
+        if(newMessageMap.get("text") != null)
+            message = newMessageMap.get("text").toString();
+        else
+            message = "Media Received";
+
+        for(UserObject mUser : mChatObject.getUserObjectArrayList()){
+            if(!mUser.getUid().equals(FirebaseAuth.getInstance().getUid())){
+                new SendNotification(message, "New Message", mUser.getNotificationKey());
+            }
+        }
+
     }
+
 
 
 
@@ -240,4 +262,5 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
     }
+
 }

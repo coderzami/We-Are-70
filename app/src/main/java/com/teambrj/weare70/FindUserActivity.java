@@ -61,12 +61,12 @@ public class FindUserActivity extends AppCompatActivity {
 
             UserObject mContact = new UserObject("",name,phone);
             contactList.add(mContact);
-            getUserDeails(mContact);
+            getUserDetails(mContact);
         }
 
     }
 
-    private void getUserDeails(UserObject mContact) {
+    private void getUserDetails(UserObject mContact) {
         DatabaseReference mUserDB = FirebaseDatabase.getInstance().getReference().child("user");
         Query query = mUserDB.orderByChild("phone").equalTo(mContact.getPhone());
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -84,8 +84,9 @@ public class FindUserActivity extends AppCompatActivity {
                         UserObject mUser = new UserObject(childSnapshot.getKey(),name, phone);
                         if(name.equals(phone))
                             for(UserObject mContactIterator: contactList){
-                                if(mContactIterator.getPhone().equals(mUser.getPhone()))
+                                if(mContactIterator.getPhone().equals(mUser.getPhone())) {
                                     mUser.setName(mContactIterator.getName());
+                                }
                             }
                         userList.add(mUser);
                         mUserListAdapter.notifyDataSetChanged();

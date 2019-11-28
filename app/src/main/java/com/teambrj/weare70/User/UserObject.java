@@ -1,8 +1,14 @@
 package com.teambrj.weare70.User;
 
-public class UserObject {
+import java.io.Serializable;
 
-    private String uid, name, phone;
+public class UserObject implements Serializable {
+
+    private String uid, name, phone, notificationKey;
+
+    public UserObject(String uid){
+        this.uid = uid;
+    }
 
     public UserObject(String uid, String name, String phone){
         this.uid = uid;
@@ -22,7 +28,15 @@ public class UserObject {
         return phone;
     }
 
+    public String getNotificationKey() {
+        return notificationKey;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setNotificationKey(String notificationKey) {
+        this.notificationKey = notificationKey;
     }
 }

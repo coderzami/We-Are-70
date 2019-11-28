@@ -18,10 +18,10 @@ import java.util.ArrayList;
 public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHolder> {
 
     ArrayList<String> mediaList;
-    Context contex;
+    Context context;
 
-    public MediaAdapter(Context contex, ArrayList<String> mediaList) {
-        this.contex = contex;
+    public MediaAdapter(Context context, ArrayList<String> mediaList) {
+        this.context = context;
         this.mediaList = mediaList;
 
     }
@@ -37,7 +37,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaAdapter.MediaViewHol
 
     @Override
     public void onBindViewHolder(@NonNull MediaViewHolder holder, int position) {
-        Glide.with(contex).load(Uri.parse(mediaList.get(position))).into(holder.mMedia);
+        Glide.with(context).load(Uri.parse(mediaList.get(position))).into(holder.mMedia);
     }
 
     @Override

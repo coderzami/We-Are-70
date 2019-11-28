@@ -1,16 +1,16 @@
 package com.teambrj.weare70;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,6 +22,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.onesignal.OneSignal;
 import com.teambrj.weare70.Chat.ChatListAdapter;
 import com.teambrj.weare70.Chat.ChatObject;
+import com.teambrj.weare70.User.UserObject;
 
 import java.util.ArrayList;
 
@@ -49,24 +50,23 @@ public class MainPageActivity extends AppCompatActivity {
         OneSignal.setInFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification);
 
 
-
         Fresco.initialize(this);
 
 
-
-        Button mButton = findViewById(R.id.logout);
+        Button mLogOut = findViewById(R.id.logout);
         Button mFindUser = findViewById(R.id.findUser);
 
         mFindUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),FindUserActivity.class));
+                startActivity(new Intent(getApplicationContext(), FindUserActivity.class));
             }
         });
 
-        mButton.setOnClickListener(new View.OnClickListener() {
+        mLogOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                OneSignal.setSubscription(false);
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -76,31 +76,32 @@ public class MainPageActivity extends AppCompatActivity {
             }
         });
 
-        getPermissions ();
+        getPermissions();
         initializeRecyclerView();
         getUserChatList();
     }
 
-    private void getUserChatList(){
+    private void getUserChatList() {
         DatabaseReference mUserChatDB = FirebaseDatabase.getInstance().getReference().child("user").child(FirebaseAuth.getInstance().getUid()).child("chat");
 
         mUserChatDB.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()) {
+                if (dataSnapshot.exists()) {
                     for (DataSnapshot childSnapShot : dataSnapshot.getChildren()) {
                         ChatObject mChat = new ChatObject(childSnapShot.getKey());
-                        boolean exists= false;
+                        boolean exists = false;
 
-                        for(ChatObject mChatIterator:  chatList) {
+                        for (ChatObject mChatIterator : chatList) {
                             if (mChatIterator.getChatId().equals(mChat.getChatId()))
                                 exists = true;
 
                         }
-                        if(exists)
+                        if (exists)
                             continue;
                         chatList.add(mChat);
                         mChatListAdapter.notifyDataSetChanged();
+                        getChatData(mChat.getChatId());
 
                     }
 
@@ -114,6 +115,62 @@ public class MainPageActivity extends AppCompatActivity {
         });
     }
 
+    private void getChatData(String chatId) {
+        DatabaseReference mChatDB = FirebaseDatabase.getInstance().getReference().child("chat").child(chatId).child("info");
+        mChatDB.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    String chatId = "";
+                    if (dataSnapshot.child("id").getValue() != null)
+                        chatId = dataSnapshot.child("id").getValue().toString();
+
+                    for (DataSnapshot userSnapShot : dataSnapshot.child("users").getChildren()) {
+                        for (ChatObject mChat : chatList) {
+                            if (mChat.getChatId().equals(chatId)) {
+                                UserObject mUser = new UserObject(userSnapShot.getKey());
+                                mChat.addToUserObjectArrayList(mUser);
+                                getUserData(mUser);
+
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getUserData(UserObject mUser) {
+        DatabaseReference mUserDB = FirebaseDatabase.getInstance().getReference().child("user").child(mUser.getUid());
+        mUserDB.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                UserObject mUser = new UserObject(dataSnapshot.getKey());
+                if (dataSnapshot.child("notificationKey").getValue() != null)
+                    mUser.setNotificationKey(dataSnapshot.child("notificationKey").getValue().toString());
+
+                for (ChatObject mChat : chatList) {
+                    for (UserObject mUserIt : mChat.getUserObjectArrayList()) {
+                        if (mUserIt.getUid().equals(mUser.getUid())) {
+                            mUserIt.setNotificationKey(mUser.getNotificationKey());
+                        }
+                    }
+                }
+                mChatListAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
 
     private void initializeRecyclerView() {
@@ -121,7 +178,7 @@ public class MainPageActivity extends AppCompatActivity {
         mChatList = findViewById(R.id.chatList);
         mChatList.setNestedScrollingEnabled(false);
         mChatList.setHasFixedSize(false);
-        mChatListLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false);
+        mChatListLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL, false);
         mChatList.setLayoutManager(mChatListLayoutManager);
         mChatListAdapter = new ChatListAdapter(chatList);
         mChatList.setAdapter(mChatListAdapter);
@@ -130,7 +187,8 @@ public class MainPageActivity extends AppCompatActivity {
 
     private void getPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(new String[]{Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS},1);
+            requestPermissions(new String[]{Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS}, 1);
         }
     }
+
 }
